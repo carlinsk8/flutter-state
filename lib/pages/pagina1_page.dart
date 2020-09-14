@@ -1,13 +1,27 @@
+import 'package:estados_app/models/usuario.dart';
+import 'package:estados_app/services/usuario_service.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class Pagina1Page extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final usuarioService = Provider.of<UsuarioService>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('pagina 1'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.exit_to_app),
+            onPressed: usuarioService.existeUsuario
+                ? usuarioService.removeUsuario
+                : null,
+          )
+        ],
       ),
-      body: InformacionUsuario(),
+      body: usuarioService.existeUsuario
+          ? InformacionUsuario(usuarioService.usuario)
+          : Center(child: Text('No hay usuario seleccionado')),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.near_me),
         onPressed: () => Navigator.pushNamed(context, 'pagina2'),
@@ -17,6 +31,9 @@ class Pagina1Page extends StatelessWidget {
 }
 
 class InformacionUsuario extends StatelessWidget {
+  final Usuario usuario;
+
+  const InformacionUsuario(this.usuario);
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -31,16 +48,18 @@ class InformacionUsuario extends StatelessWidget {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           Divider(),
-          ListTile(title: Text('Nombre: ')),
-          ListTile(title: Text('Edad: ')),
+          ListTile(title: Text('Nombre: ${this.usuario.nombre}')),
+          ListTile(title: Text('Edad: ${this.usuario.edad}')),
           Text(
             'Profeciones',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           Divider(),
-          ListTile(title: Text('Profeción 1 : ')),
-          ListTile(title: Text('Profeción 1 : ')),
-          ListTile(title: Text('Profeción 1 : ')),
+          ...this
+              .usuario
+              .profeciones
+              .map((profecion) => ListTile(title: Text(profecion)))
+              .toList()
         ],
       ),
     );
