@@ -1,4 +1,7 @@
+import 'package:estados_app/models/usuario.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:estados_app/bloc/usuario/usuario_bloc.dart';
 
 class Pagina1Page extends StatelessWidget {
   @override
@@ -6,8 +9,24 @@ class Pagina1Page extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('pagina 1'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: () {
+              BlocProvider.of<UsuarioBloc>(context).add(BorrarUsuario());
+            },
+          )
+        ],
       ),
-      body: InformacionUsuario(),
+      body: BlocBuilder<UsuarioBloc, UsuarioState>(
+        builder: (_, state) {
+          return state.existeUsuario
+              ? InformacionUsuario(state.usuario)
+              : Center(
+                  child: Text('No hay un usuario seleccionado'),
+                );
+        },
+      ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.near_me),
         onPressed: () => Navigator.pushNamed(context, 'pagina2'),
@@ -17,6 +36,9 @@ class Pagina1Page extends StatelessWidget {
 }
 
 class InformacionUsuario extends StatelessWidget {
+  final Usuario usuario;
+
+  const InformacionUsuario(this.usuario);
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -31,16 +53,14 @@ class InformacionUsuario extends StatelessWidget {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           Divider(),
-          ListTile(title: Text('Nombre: ')),
-          ListTile(title: Text('Edad: ')),
+          ListTile(title: Text('Nombre: ${usuario.nombre}')),
+          ListTile(title: Text('Edad: ${usuario.edad}')),
           Text(
             'Profeciones',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           Divider(),
-          ListTile(title: Text('Profeción 1 : ')),
-          ListTile(title: Text('Profeción 1 : ')),
-          ListTile(title: Text('Profeción 1 : ')),
+          ...usuario.profeciones.map((e) => ListTile(title: Text(e))).toList()
         ],
       ),
     );
